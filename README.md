@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/VillainsRule/Rumbler/assets/101288516/e0f2b728-bc6f-46c7-a121-a07d5f0746ff">
+  <img src="https://media.discordapp.net/attachments/1055625743448682557/1120786454931591189/rr_grinder.png">
   <p>join our <a href="https://discord.gg/BJCms66bcu">discord</a> if you're cool :)</p>
   <hr>
   <h2>Features</h2>
@@ -30,20 +30,20 @@
 2. Open your Terminal window.
 3. Clone the repo from Git:
 ```bash
-git clone https://github.com/SlashyLLC/discord-token-reset.git
+git clone https://github.com/VillainsRule/Rumbler.git
 ```
 4. Enter the new folder:
 ```bash
-cd discord-token-reset
+cd Rumbler
 ```
 5. Install dependencies:
 ```bash
 npm i
 ```
-6. Edit values in tokens.txt. Values should be in `email:password:token` format. To easily edit tokens.txt, run:
+6. Edit values in config.js. To easily open it, run:
      - remember to save the file if you open it this way!
 ```bash
-open -e tokens.txt
+open -e config.js
 ```
 7. Run the program!
 ```bash

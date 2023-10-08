@@ -1,54 +1,31 @@
 <div align="center">
-  <img src="https://media.discordapp.net/attachments/1055625743448682557/1120786454931591189/rr_grinder.png">
-  <p>join our <a href="https://discord.gg/BJCms66bcu">discord</a> if you're cool :)</p>
-  <hr>
-  <h2>Features</h2>
-  <p align="left">
-    
-    
-- [x] Auto Join
-   - [x] Server/Channel join blacklist
-- [x] Auto Daily
-- [x] Auto Weekly
-- [x] Simple, easy dashboard
-- [x] Infinite accounts
-    
-    
-  </p>
-  <h2>Coming soon!</h2>
-  <p align="left">
-    
-    
-    - [x] Auto Open
-    - [x] Auto Particle
-   
-  </p>
-  <h2>Installation</h2>
+    <img src="https://media.discordapp.net/attachments/1055625743448682557/1120786454931591189/rr_grinder.png">
+    <p>working as of 10/7/23, rumble admins banned my account but didn't change the emojis. nice work rumble royale!</p>
+    <hr>
+    <h2>Features</h2>
+</div>
+<p>
+    <ul>
+        <li>Auto Join</li>
+        <ul><li>Server/Channel join blacklist</li></ul>
+        <li>Auto Claim</li>
+        <ul><li>Daily/Weekly</li></ul>
+        <li>Web Dashboard</li>
+        <li>INFINITE tokens/accounts</li>
+    </ul>
+</p>
+<h2 align="center">Installation</h2>
 
-  
-1. Install [NodeJS](https://nodejs.org/en/download/current).
-2. Open your Terminal window.
-3. Clone the repo from Git:
+1. Clone the repo from Git:
 ```bash
-git clone https://github.com/VillainsRule/Rumbler.git
+git clone https://github.com/VillainsRule/Rumbler.git && cd Rumbler
 ```
-4. Enter the new folder:
-```bash
-cd Rumbler
-```
-5. Install dependencies:
+2. Install dependencies:
 ```bash
 npm i
 ```
-6. Edit values in config.js. To easily open it, run:
-     - remember to save the file if you open it this way!
-```bash
-open -e config.js
-```
-7. Run the program!
+3. Edit values in `config.js`. Add tokens to `tokens.txt`.
+4. Run the program!
 ```bash
 node .
 ```
-
-  
-</div>

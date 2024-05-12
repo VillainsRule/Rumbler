@@ -1,0 +1,9 @@
+# node
+node_modules/
+bun.lockb
+
+# generated data
+db/
+
+# mac conf
+**/.DS_Store

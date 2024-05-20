@@ -22,6 +22,22 @@
 3. Configure the bot in `config.js`. Add tokens to `tokens.txt`.
 4. Run the program! `npm start`
 
+<h2 align="center">Anticheat History 🤡</h2>
+
+- Battle Joining Fails
+  - Date Reported: 4/21/24
+  - Impacted Features: Battle Joining (failed due to invisible unicode characters)
+  - Patch Published: 5/12/24
+  - Notes: notifications were off on repo (idk why), took me 3w to see. also was sick when trying to fix. bad "patch" of bot.
+
+- Battle Joining Fails (2nd time)
+  - Date Reported: 5/20/24
+  - Impacted Features: Battle Joining (failed due to deferring & broken emoji)
+  - Patch Published: 5/20/24
+  - Notes: this is such a silly way to "fix" it, also calling 2nd time because i'm sure this will happen again.
+
+Noble (but sad) attempts. My cheats don't get patched that easily.
+
 <h2 align="center">Takedown</h2>
 
 I fully understand if the developers of Rumble Royale would like me to take this codebase down. This is published for the point of showing the exploits in RR and is not meant to be used maliciously or in public servers. You can DM @xthonk if you'd like me to remove this.

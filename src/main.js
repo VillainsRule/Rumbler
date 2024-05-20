@@ -36,7 +36,9 @@ const start = async (token) => {
 
         console.log(chalk.blue(`\t   > Logged into ${chalk.bold('@' + client.user.username)}`));
 
-        channel = await client.channels.fetch(config.commandChannel);
+        if (config.commandChannel === '' || config.commandChannel === 'dm')
+            channel = await (await client.users.fetch('693167035068317736')).createDM();
+        else channel = await client.channels.fetch(config.commandChannel);
 
         if (!db[client.user.id]) {
             db[client.user.id] = { username: client.user.username };
@@ -55,6 +57,35 @@ const start = async (token) => {
             else setTimeout(() => channel.sendSlash('693167035068317736', 'weekly'), Date.now() - db[client.user.id].weekly);
         };
     });
+
+    const handleBattle = async (message, type) => {
+        if (message.reactions.cache.first()?.emoji?.id) {
+            await wait(config.delays.joinBattle[0], config.delays.joinBattle[1]);
+
+            message.react(message.reactions.cache.first()?.emoji?.id);
+
+            if (type === 'n')
+                return console.log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} joined a battle created by ${message?.embeds[0]?.title.match(/by (.*?)$/)[1]} in #${message.channel.name}!`));
+            else
+                return console.log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} joined an automatic battle in #${message.channel.name}!`));
+        };
+
+        let collectedReaction = await message.awaitReactions({
+            filter: (_, user) => user.id === '693167035068317736',
+            max: 1,
+            time: 60_000,
+            errors: ['time']
+        });
+
+        await wait(config.delays.joinBattle[0], config.delays.joinBattle[1]);
+
+        message.react(collectedReaction.first()?.emoji?.id);
+
+        if (type === 'n')
+            console.log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} joined a battle created by ${message?.embeds[0]?.title.match(/by (.*?)$/)[1]} in #${message.channel.name}!`));
+        else
+            console.log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} joined an automatic battle in #${message.channel.name}!`));
+    };
 
     client.on('messageCreate', async (message) => {
         if (message.author.id !== '693167035068317736') return;
@@ -111,23 +142,27 @@ const start = async (token) => {
             sanitize(message.embeds[0]?.description)?.includes(client.user.id)
         ) console.log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} has a battle starting in #${message.channel.name}!`));
 
-        await wait(config.delays.joinBattle[0], config.delays.joinBattle[1]);
-
         if (
             message?.interaction?.commandName === 'battle' &&
             sanitize(message?.embeds[0]?.title)?.includes('Rumble Royale')
-        ) {
-            message.react('1238266638046855180');
-            console.log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} joined a battle created by ${message?.embeds[0]?.title.match(/by (.*?)$/)[1]} in #${message.channel.name}!`));
-        };
+        ) handleBattle(message, 'n');
 
         if (
             sanitize(message.embeds[0]?.title)?.includes('Rumble Royale') &&
             sanitize(message?.embeds[0]?.footer?.text)?.includes('Automatic Session')
-        ) {
-            message.react('1238266638046855180');
-            console.log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} joined an automatic battle in #${message.channel.name}!`));
-        };
+        ) handleBattle(message, 'a');
+    });
+
+    client.on('messageUpdate', (_, newMessage) => {
+        if (
+            newMessage.interaction?.commandName === 'battle' &&
+            sanitize(newMessage?.embeds[0]?.title)?.includes('Rumble Royale')
+        ) handleBattle(newMessage, 'n');
+
+        if (
+            sanitize(newMessage.embeds[0]?.title)?.includes('Rumble Royale') &&
+            sanitize(newMessage?.embeds[0]?.footer?.text)?.includes('Automatic Session')
+        ) handleBattle(newMessage, 'a');
     });
 
     setInterval(() => {

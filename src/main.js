@@ -121,15 +121,25 @@ const start = async (token) => {
         };
 
         if (message?.embeds[0]?.author?.name?.toLowerCase().includes(`${client.user.username.toLowerCase()}'s balance`)) {
-            gold = Number(message.embeds[0].description.match(/Gold\*\*: [a-zA-Z0-9:\<\>]+ ([0-9,]+)/)[1].replace(/,/g, ''));
-            gems = Number(message.embeds[0].description.match(/Gold\*\*: [a-zA-Z0-9:\<\>]+ ([0-9,]+)/)[1].replace(/,/g, ''));
-
+            // Obtener la descripción del embed
+            const embedDescription = message.embeds[0].description;
+    
+            // Expresiones regulares para capturar los valores de gold y gems
+            const goldMatch = embedDescription.match(/Gold\*\*:\s*<:[a-zA-Z0-9_]+:\d+>\s*([\d,]+)/);
+            const gemsMatch = embedDescription.match(/Gems\*\*:\s*<:[a-zA-Z0-9_]+:\d+>\s*(\d+)/);
+    
+            // Convertir los valores capturados a números
+            const gold = goldMatch ? Number(goldMatch[1].replace(/,/g, '')) : 0;
+            const gems = gemsMatch ? Number(gemsMatch[1].replace(/,/g, '')) : 0;
+    
+            // Actualizar la base de datos con los nuevos valores
             db[client.user.id].gold = gold;
             db[client.user.id].gems = gems;
             save();
-
-            console.log(chalk.yellow(`\t   > ${chalk.bold('@' + client.user.username)} has ${gold.toLocaleString()} gold & ${gems.toLocaleString()} gems!`));
-        };
+    
+            // Imprimir solo el mensaje deseado
+            console.log(chalk.magenta(`\t   > @${client.user.username} has ${gold.toLocaleString()} gold & ${gems.toLocaleString()} gems!`));
+        }
 
         if (
             onBreak ||

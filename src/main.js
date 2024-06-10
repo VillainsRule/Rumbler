@@ -52,8 +52,6 @@ const wait = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const sanitize = (str) => str?.replace(/[^\p{L}\p{N}\s']/gu, '');
 
-const processedMessages = new Set();
-
 const start = async (token) => {
     let onBreak = false;
     let gold = 0;
@@ -63,6 +61,7 @@ const start = async (token) => {
     let channel;
 
     let client = new selfbot.Client({ checkUpdate: false });
+    const processedMessages = new Set(); // Mover la declaración aquí
 
     client.on('ready', async () => {
         client.user.setStatus(config.statuses[Math.floor(Math.random() * config.statuses.length)]);
@@ -93,35 +92,39 @@ const start = async (token) => {
     const handleBattle = async (message, type) => {
         if (processedMessages.has(message.id)) return;
         processedMessages.add(message.id);
-        
-        if (message.reactions.cache.first()?.emoji?.id) {
-            await wait(config.delays.joinBattle[0], config.delays.joinBattle[1]);
 
-            message.react(message.reactions.cache.first()?.emoji?.id);
+        try {
+            if (message.reactions.cache.first()?.emoji?.id) {
+                await wait(randomInt(config.delays.joinBattle[0], config.delays.joinBattle[1]));
 
-            if (type === 'n')
-                return console.log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} joined a battle created by ${message?.embeds[0]?.title.match(/by (.*?)$/)[1]} in #${message.channel.name}!`));
-            else
-                return console.log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} joined an automatic battle in #${message.channel.name}!`));
-        };
+                await message.react(message.reactions.cache.first()?.emoji?.id);
 
-        let collectedReaction = await message.awaitReactions({
-            filter: (_, user) => user.id === '693167035068317736',
-            max: 1,
-            time: 60_000,
-            errors: ['time']
-        });
+                if (type === 'n')
+                    log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} joined a battle created by ${message?.embeds[0]?.title.match(/by (.*?)$/)[1]} in #${message.channel.name}!`));
+                else
+                    log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} joined an automatic battle in #${message.channel.name}!`));
+            } else {
+                let collectedReaction = await message.awaitReactions({
+                    filter: (_, user) => user.id === '693167035068317736',
+                    max: 1,
+                    time: 60_000,
+                    errors: ['time']
+                });
 
-        await wait(config.delays.joinBattle[0], config.delays.joinBattle[1]);
+                await wait(randomInt(config.delays.joinBattle[0], config.delays.joinBattle[1]));
 
-        message.react(collectedReaction.first()?.emoji?.id);
+                await message.react(collectedReaction.first()?.emoji?.id);
 
-        if (type === 'n')
-            console.log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} joined a battle created by ${message?.embeds[0]?.title.match(/by (.*?)$/)[1]} in #${message.channel.name}!`));
-        else
-            console.log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} joined an automatic battle in #${message.channel.name}!`));
+                if (type === 'n')
+                    log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} joined a battle created by ${message?.embeds[0]?.title.match(/by (.*?)$/)[1]} in #${message.channel.name}!`));
+                else
+                    log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} joined an automatic battle in #${message.channel.name}!`));
+            }
+        } catch (error) {
+            log(chalk.red(`\t   > Error joining battle for ${chalk.bold('@' + client.user.username)}: ${error.message}`));
+        }
     };
-    
+
     client.on('messageCreate', async (message) => {
         if (message.author.id !== '693167035068317736') return;
 
@@ -209,7 +212,7 @@ const start = async (token) => {
         if (
             sanitize(message.embeds[0]?.title)?.includes('Started a new') &&
             sanitize(message.embeds[0]?.description)?.includes(client.user.id)
-        ) log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} has a battle starting in #${message.channel.name}!`));
+        ) //log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} has a battle starting in #${message.channel.name}!`));
 
         if (
             message?.interaction?.commandName === 'battle' &&
@@ -241,7 +244,7 @@ const start = async (token) => {
             onBreak = true;
             setTimeout(() => onBreak = false, cooldown);
 
-            console.log(chalk.magenta(`\t   > ${chalk.bold('@' + client.user.username)} is taking a short break for ${(cooldown / 1000).toFixed(1)} seconds.`));
+            log(chalk.magenta(`\t   > ${chalk.bold('@' + client.user.username)} is taking a short break for ${(cooldown / 1000).toFixed(1)} seconds.`));
         };
 
         if ((Math.random() < config.breaks.long.frequency) && !onBreak && client.user?.username) {
@@ -250,14 +253,9 @@ const start = async (token) => {
             onBreak = true;
             setTimeout(() => onBreak = false, cooldown);
 
-            console.log(chalk.magenta(`\t   > ${chalk.bold('@' + client.user.username)} is taking a long break for ${(cooldown / 1000).toFixed(1)} seconds.`));
+            log(chalk.magenta(`\t   > ${chalk.bold('@' + client.user.username)} is taking a long break for ${(cooldown / 1000).toFixed(1)} seconds.`));
         };
     }, 30000);
-
-    client.login(token).catch((err) => {
-        if (err.toString().includes('TOKEN_INVALID'))
-            console.log(`\t   ${chalk.redBright('> ERROR:')} ${chalk.red(`The token "${token}" is invalid.`)}`);
-    });
 
     client.login(token).catch((err) => {
         if (err.toString().includes('TOKEN_INVALID'))
@@ -268,7 +266,11 @@ const start = async (token) => {
 let tokens = process.env.tokens ? process.env.tokens.split('\n') : fs.readFileSync('tokens.txt', 'utf-8').split('\n');
 tokens = tokens.map((t) => t.trim()).filter(t => t);
 
-if (tokens.length) for (let i = 0; i < tokens.length; i++) {
-    start(tokens[i]);
-    await wait(config.delays.login);
-} else console.log(`\t   ${chalk.redBright('> ERROR:')} ${chalk.red(`Tokens are missing. Enter a few in tokens.txt.\n\n`)}`);
+if (tokens.length) {
+    for (let i = 0; i < tokens.length; i++) {
+        await start(tokens[i]);
+        await wait(config.delays.login);
+    }
+} else {
+    console.log(`\t   ${chalk.redBright('> ERROR:')} ${chalk.red(`Tokens are missing. Enter a few in tokens.txt.\n\n`)}`);
+}

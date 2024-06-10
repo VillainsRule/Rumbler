@@ -1,23 +1,52 @@
-const { emit: originalEmit } = process;
-process.emit = function (event, error) {
-    return event === 'warning' && error.name === 'DeprecationWarning' ? false : originalEmit.apply(process, arguments);
-};
-import { exec } from 'child_process';
-
+import express from 'express';
+import { Server as SocketIO } from 'socket.io';
+import SimplDB from 'simpl.db';
 import fs from 'fs';
 import chalk from 'chalk';
+import { exec } from 'child_process';
 import * as selfbot from 'discord.js-selfbot-v13';
-
 import config from '../config.js';
 
 console.clear();
 console.log(chalk.green(`\n\n\tuser@null ~ $ RUMBLER`));
 
-if (!fs.existsSync('./db')) fs.mkdirSync('./db');
-if (!fs.existsSync('./db/accounts.json')) fs.writeFileSync('./db/accounts.json', '{}');
+const app = express();
+const db = new SimplDB({ name: 'accounts', storagePath: './db' });
 
-const db = JSON.parse(fs.readFileSync('./db/accounts.json', 'utf-8'));
-const save = () => fs.writeFileSync('./db/accounts.json', JSON.stringify(db, null, 4));
+// Static files
+app.use(express.static('site'));
+
+// API endpoints
+app.get('/api/database', (req, res) => res.json(db.toJSON()));
+app.get('/api/config', (req, res) => res.send(config));
+
+// Start the server
+const server = app.listen(config.websitePort, () => {
+    console.log(`> Website started. Visit http://localhost:${config.websitePort} to access it.`);
+});
+
+// Setup Socket.io
+const io = new SocketIO(server);
+
+io.on('connection', (socket) => {
+    socket.emit('balanceUpdate', db.toJSON());
+    socket.emit('logs', cleanLogs(logs)); // Envía los registros limpios a través de Socket.io
+});
+
+// Logs array to keep track of log messages
+const logs = [];
+
+// Function to log messages
+const log = (message) => {
+    logs.push(message);
+    console.log(message);
+    io.emit('logs', logs);
+};
+
+// Function to clean logs from ANSI color codes
+const cleanLogs = (logs) => {
+    return logs.map(log => log.replace(/\x1b\[[0-9;]*m/g, '')); // Elimina códigos de color ANSI de cada log
+};
 
 const wait = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -36,30 +65,29 @@ const start = async (token) => {
     let client = new selfbot.Client({ checkUpdate: false });
 
     client.on('ready', async () => {
-        client.user.setStatus(config.statuses[config.statuses.length * Math.random() | 0]);
+        client.user.setStatus(config.statuses[Math.floor(Math.random() * config.statuses.length)]);
 
-        console.log(chalk.blue(`\t   > Logged into ${chalk.bold('@' + client.user.username)}`));
+        log(chalk.blue(`\t   > Logged into ${chalk.bold('@' + client.user.username)}`));
 
         if (config.commandChannel === '' || config.commandChannel === 'dm')
             channel = await (await client.users.fetch('693167035068317736')).createDM();
         else channel = await client.channels.fetch(config.commandChannel);
 
-        if (!db[client.user.id]) {
-            db[client.user.id] = { username: client.user.username };
-            save();
-        };
+        if (!db.has(client.user.id)) {
+            db.set(client.user.id, { username: client.user.username });
+        }
 
         if (config.autoDaily) {
-            if (!db[client.user.id].daily) await channel.sendSlash('693167035068317736', 'daily');
-            else if (db[client.user.id].daily && (db[client.user.id].daily - Date.now() < 0)) await channel.sendSlash('693167035068317736', 'daily');
-            else setTimeout(() => channel.sendSlash('693167035068317736', 'daily'), Date.now() - db[client.user.id].daily);
-        };
+            if (!db.get(client.user.id).daily) await channel.sendSlash('693167035068317736', 'daily');
+            else if (db.get(client.user.id).daily && (db.get(client.user.id).daily - Date.now() < 0)) await channel.sendSlash('693167035068317736', 'daily');
+            else setTimeout(() => channel.sendSlash('693167035068317736', 'daily'), Date.now() - db.get(client.user.id).daily);
+        }
 
         if (config.autoWeekly) {
-            if (!db[client.user.id].weekly) await channel.sendSlash('693167035068317736', 'weekly');
-            else if (db[client.user.id].weekly && (db[client.user.id].weekly - Date.now() < 0)) await channel.sendSlash('693167035068317736', 'weekly');
-            else setTimeout(() => channel.sendSlash('693167035068317736', 'weekly'), Date.now() - db[client.user.id].weekly);
-        };
+            if (!db.get(client.user.id).weekly) await channel.sendSlash('693167035068317736', 'weekly');
+            else if (db.get(client.user.id).weekly && (db.get(client.user.id).weekly - Date.now() < 0)) await channel.sendSlash('693167035068317736', 'weekly');
+            else setTimeout(() => channel.sendSlash('693167035068317736', 'weekly'), Date.now() - db.get(client.user.id).weekly);
+        }
     });
 
     const handleBattle = async (message, type) => {
@@ -96,13 +124,13 @@ const start = async (token) => {
     
     client.on('messageCreate', async (message) => {
         if (message.author.id !== '693167035068317736') return;
-    
+
         const embedTitle = message.embeds[0]?.title;
         if (embedTitle && embedTitle.includes('WINNER!')) {
             if (message.mentions.members?.size &&
                 message.mentions.members.first().id === client.user.id
             ) {
-                const description = message?.embeds[0]?.description;
+                const description = message.embeds[0].description;
                 const goldMatch = description.match(/(?<=\*\*Reward:\*\* )(\d+)/);
                 if (goldMatch) {
                     const goldAmount = Number(goldMatch[0]);
@@ -111,77 +139,66 @@ const start = async (token) => {
                     if (config.sendSlashOnWin) {
                         await channel.sendSlash('693167035068317736', 'balance');
                     }
-                    console.log(chalk.yellow(`\t   > ${chalk.bold('@' + client.user.username)} won a match and got ${goldAmount.toLocaleString()} gold!`));
+                    log(chalk.yellow(`\t   > ${chalk.bold('@' + client.user.username)} won a match and got ${goldAmount.toLocaleString()} gold!`));
                     updateWindowTitle();
                 } else {
                     console.error("Could not extract gold amount from description:", description);
                 }
             }
-        }    
-    
+        }
+
         function updateTotalCounters(amount) {
             wins += amount;
-            console.log(`Total wins this session: ${wins}`);
-            console.log(`Total gold this session: ${totalGold.toLocaleString()}`);
-    
+            log(`Total wins this session: ${wins}`);
+            log(`Total gold this session: ${totalGold.toLocaleString()}`);
+
             // También puedes enviar estos contadores a un canal de Discord específico
             // Ejemplo:
-            const channel = client.channels.cache.get(config.resultChannelId);
-            if (channel) {
-                channel.send(`This session\nTotal wins: ${wins}\nTotal gold earned: ${totalGold.toLocaleString()}`)
+            const resultChannel = client.channels.cache.get(config.resultChannelId);
+            if (resultChannel) {
+                resultChannel.send(`This session\nTotal wins: ${wins}\nTotal gold earned: ${totalGold.toLocaleString()}`)
                     .catch(console.error);  // Capturar errores potenciales
             } else {
                 console.error("Channel not found!");
             }
         }
+
         function updateWindowTitle() {
             // Implementa la lógica para actualizar el título de la ventana o el elemento de la interfaz de usuario
             exec(`title Total wins this session: ${wins}, total gold this session: ${totalGold.toLocaleString()}`);
         }
+
         exec(`title Total wins this session: ${wins}, total gold this session: ${totalGold.toLocaleString()}`);
         if (
             message.interaction?.user?.id === client.user.id &&
-            message?.interaction?.commandName === 'daily' &&
-            sanitize(message?.embeds[0]?.description).includes('You received your daily')
+            message.interaction?.commandName === 'daily' &&
+            sanitize(message.embeds[0].description).includes('You received your daily')
         ) {
-            db[client.user.id].daily = Date.now() + 8.64e+7;
-            save();
-            console.log(chalk.blue(`\t   > ${client.user.username} claimed daily.`));
-        };
-    
+            db.set(client.user.id, { ...db.get(client.user.id), daily: Date.now() + 8.64e+7 });
+            log(chalk.blue(`\t   > ${client.user.username} claimed daily.`));
+        }
+
         if (
             message.interaction?.user?.id === client.user.id &&
-            message?.interaction?.commandName === 'weekly' &&
-            sanitize(message?.embeds[0]?.description).includes('You received your weekly')
+            message.interaction?.commandName === 'weekly' &&
+            sanitize(message.embeds[0].description).includes('You received your weekly')
         ) {
-            db[client.user.id].weekly = Date.now() + 6.048e+8;
-            save();
-            console.log(chalk.blue(`\t   > ${client.user.username} claimed weekly.`));
-        };
-    
-        if (message?.embeds[0]?.author?.name?.toLowerCase().includes(`${client.user.username.toLowerCase()}'s balance`)) {
-            // Obtener la descripción del embed
+            db.set(client.user.id, { ...db.get(client.user.id), weekly: Date.now() + 6.048e+8 });
+            log(chalk.blue(`\t   > ${client.user.username} claimed weekly.`));
+        }
+
+        if (message.embeds[0]?.author?.name?.toLowerCase().includes(`${client.user.username.toLowerCase()}'s balance`)) {
             const embedDescription = message.embeds[0].description;
-    
-            // Expresiones regulares para capturar los valores de gold y gems
+
             const goldMatch = embedDescription.match(/Gold\*\*:\s*<:[a-zA-Z0-9_]+:\d+>\s*([\d,]+)/);
-            const gemsMatch = embedDescription.match(/Gems\*\*:\s*<:[a-zA-Z0-9_]+:\d+>\s*(\d+)/);
-    
-            // Convertir los valores capturados a números
+            const gemsMatch = embedDescription.match(/Gems\*\*:\s*<:[a-zA-Z0-9_]+:\d+>\s*([\d,]+)/);
+
             const gold = goldMatch ? Number(goldMatch[1].replace(/,/g, '')) : 0;
             const gems = gemsMatch ? Number(gemsMatch[1].replace(/,/g, '')) : 0;
-    
-            // Actualizar la base de datos con los nuevos valores
-            db[client.user.id].gold = gold;
-            db[client.user.id].gems = gems;
-            save();
-    
-            // Imprimir solo el mensaje deseado
-            console.log(chalk.magenta(`\t   > @${client.user.username} has ${gold.toLocaleString()} gold & ${gems.toLocaleString()} gems!`));
+
+            db.set(client.user.id, { ...db.get(client.user.id), gold, gems });
+            log(chalk.magenta(`\t   > @${client.user.username} has ${gold.toLocaleString()} gold & ${gems.toLocaleString()} gems!`));
         }
-    
-        
-        
 
         if (
             onBreak ||
@@ -192,28 +209,28 @@ const start = async (token) => {
         if (
             sanitize(message.embeds[0]?.title)?.includes('Started a new') &&
             sanitize(message.embeds[0]?.description)?.includes(client.user.id)
-        ) console.log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} has a battle starting in #${message.channel.name}!`));
+        ) log(chalk.blue(`\t   > ${chalk.bold('@' + client.user.username)} has a battle starting in #${message.channel.name}!`));
 
         if (
             message?.interaction?.commandName === 'battle' &&
-            sanitize(message?.embeds[0]?.title)?.includes('Rumble Royale')
+            sanitize(message.embeds[0]?.title)?.includes('Rumble Royale')
         ) handleBattle(message, 'n');
 
         if (
             sanitize(message.embeds[0]?.title)?.includes('Rumble Royale') &&
-            sanitize(message?.embeds[0]?.footer?.text)?.includes('Automatic Session')
+            sanitize(message.embeds[0]?.footer?.text)?.includes('Automatic Session')
         ) handleBattle(message, 'a');
     });
 
     client.on('messageUpdate', (_, newMessage) => {
         if (
             newMessage.interaction?.commandName === 'battle' &&
-            sanitize(newMessage?.embeds[0]?.title)?.includes('Rumble Royale')
+            sanitize(newMessage.embeds[0]?.title)?.includes('Rumble Royale')
         ) handleBattle(newMessage, 'n');
 
         if (
             sanitize(newMessage.embeds[0]?.title)?.includes('Rumble Royale') &&
-            sanitize(newMessage?.embeds[0]?.footer?.text)?.includes('Automatic Session')
+            sanitize(newMessage.embeds[0]?.footer?.text)?.includes('Automatic Session')
         ) handleBattle(newMessage, 'a');
     });
 
@@ -240,6 +257,11 @@ const start = async (token) => {
     client.login(token).catch((err) => {
         if (err.toString().includes('TOKEN_INVALID'))
             console.log(`\t   ${chalk.redBright('> ERROR:')} ${chalk.red(`The token "${token}" is invalid.`)}`);
+    });
+
+    client.login(token).catch((err) => {
+        if (err.toString().includes('TOKEN_INVALID'))
+            log(`\t   ${chalk.redBright('> ERROR:')} ${chalk.red(`The token "${token}" is invalid.`)}`);
     });
 };
 

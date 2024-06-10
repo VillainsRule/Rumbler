@@ -8,6 +8,8 @@
  */
 
 export default {
+
+    websitePort: 3000,
     // the ID of the channel that the bot runs /daily and /balance in.
     // to get a channel ID, enable dev mode & right click the channel.
     // you can also set this to "dm" or leave it blank to use DMs.
@@ -62,9 +64,9 @@ export default {
     // list: 'online', 'idle', 'dnd', 'invisible'
     statuses: ['dnd'],
 
-    // the ID of the channel where the bot sends battle results.
+     // the ID of the channel where the bot sends battle results.
     resultChannelId: 'your-channel-id',
 
-    // whether to send a slash command each time the bot wins a battle.
+     // whether to send a slash command each time the bot wins a battle.
     sendSlashOnWin: true
 };

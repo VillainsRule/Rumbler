@@ -1,0 +1,159 @@
+@import url("https://fonts.googleapis.com/css2?family=Comfortaa&display=swap");
+
+* {
+  padding: 0;
+  margin: 0;
+  font-family: 'Comfortaa';
+}
+
+body {
+  background: linear-gradient(270deg, rgb(213, 67, 5) 0%, rgb(185, 22, 22) 100%);
+  color: #fff;
+}
+
+#particles-js {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.logo,
+nav {
+  align-items: center;
+}
+
+nav {
+  width: 100%;
+  height: 15vh;
+  display: flex;
+  background-color: black;
+  border-radius: 0 0 3vh 3vh;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.logo {
+  position: absolute;
+  height: 10vh;
+  display: flex;
+  flex-direction: row;
+}
+
+.icon {
+  margin-left: 5%;
+  height: 100%;
+}
+
+.lt,
+.ss {
+  color: #fff;
+}
+
+.lt {
+    margin-left: 15px;
+    font-size: 6vh;
+}
+
+.ss {
+    height: 10vh;
+    width: 160px;
+    background-color: #202020;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.headertitle {
+    display: flex;
+    flex-direction: column;
+}
+
+.support {
+  position: absolute;
+  right: 15px;
+}
+
+.login {
+  position: absolute;
+  right: 8px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  opacity: 0.8;
+  background-color: black;
+  width: 45%;
+  border-radius: 5vh;
+  text-align: center;
+  overflow: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.container::-webkit-scrollbar {
+    display: none;
+}
+
+.container-holder {
+    display: flex;
+    flex-direction: row;
+    gap: 10%;
+    height: 65%;
+    margin-top: 12%;
+    padding: 0;
+    width: 86%;
+    margin-left: 7%;
+}
+
+h1, h2 {
+    color: white;
+    margin-top: 3vh;
+}
+
+h2 {
+    font-size: 1.7em;
+}
+
+.totalbal {
+    margin-top: 1vh;
+}
+
+.itemimg {
+    height: 5vh;
+    margin-top: 10px;
+}
+
+.itemnm {
+    font-size: 5vh;
+}
+
+.itemimg2 {
+    height: 3vh;
+    margin-top: 10px;
+}
+
+.itemnm2 {
+    font-size: 3vh;
+}
+
+.userbal {
+    margin-top: 2vh;
+    font-size: 3.25vh;
+}
+
+.main {
+  grid-area: main;
+  background-color: #202020;
+}
+
+.logs {
+    font-size: 18px;
+    line-height: 30px;
+}

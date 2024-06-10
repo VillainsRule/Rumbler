@@ -23,6 +23,8 @@ const wait = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const sanitize = (str) => str?.replace(/[^\p{L}\p{N}\s']/gu, '');
 
+const processedMessages = new Set();
+
 const start = async (token) => {
     let onBreak = false;
     let gold = 0;
@@ -61,6 +63,9 @@ const start = async (token) => {
     });
 
     const handleBattle = async (message, type) => {
+        if (processedMessages.has(message.id)) return;
+        processedMessages.add(message.id);
+        
         if (message.reactions.cache.first()?.emoji?.id) {
             await wait(config.delays.joinBattle[0], config.delays.joinBattle[1]);
 

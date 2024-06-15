@@ -7,15 +7,15 @@
 
 <ul>
     <li>Auto Join</li>
-    <ul><li>Server/Channel Blacklist</li></ul>
+    <ul><li>Simultaneous Multi-Account JoinBattle</li></ul>
     <li>Auto Claim</li>
     <ul><li>Daily/Weekly</li></ul>
     <li>Balance Logger</li>
+    <ul><li>AutoCheck Balance every win</li></ul>
+    <li>Server/Channel Blacklist</li>
     <li>Random "Breaks"</li>
     <li>Infinite Tokens/Accounts</li>
     <li>Web Panel</li>
-    <li>Simultaneous Multi-Account JoinBattle</li>
-    <li>AutoCheck Balance every win</li>
 </ul>
 
 <h2 align="center">Installation</h2>

@@ -10,7 +10,7 @@
     <ul><li>Simultaneous Multi-Account JoinBattle</li></ul>
     <li>Auto Claim</li>
     <ul><li>Daily/Weekly</li></ul>
-    <li>Balance Logger</li>
+    <li>Balance/Wins/Income Logger</li>
     <ul><li>AutoCheck Balance every win</li></ul>
     <li>Server/Channel Blacklist</li>
     <li>Random "Breaks"</li>

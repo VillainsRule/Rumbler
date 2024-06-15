@@ -8,14 +8,16 @@
  */
 
 export default {
+
+    websitePort: 3000,
     // the ID of the channel that the bot runs /daily and /balance in.
     // to get a channel ID, enable dev mode & right click the channel.
     // you can also set this to "dm" or leave it blank to use DMs.
     commandChannel: '',
 
     // whether to automatically run the /daily and /weekly commands.
-    autoDaily: true,
-    autoWeekly: true,
+    autoDaily: false,
+    autoWeekly: false,
 
     blacklist: {
         // a list of server IDs the bot will never join battles in.
@@ -60,5 +62,11 @@ export default {
 
     // the statuses the bot can login with.
     // list: 'online', 'idle', 'dnd', 'invisible'
-    statuses: ['dnd']
+    statuses: ['dnd'],
+
+     // the ID of the channel where the bot sends battle results.
+    resultChannelId: 'your-channel-id',
+
+     // whether to send a slash command each time the bot wins a battle.
+    sendSlashOnWin: true
 };

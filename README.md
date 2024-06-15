@@ -13,6 +13,9 @@
     <li>Balance Logger</li>
     <li>Random "Breaks"</li>
     <li>Infinite Tokens/Accounts</li>
+    <li>Web Panel</li>
+    <li>Simultaneous Multi-Account JoinBattle</li>
+    <li>AutoCheck Balance every win</li>
 </ul>
 
 <h2 align="center">Installation</h2>

@@ -1,6 +1,6 @@
 <div align="center">
-    <h1>rumbler.js</h1>
-    <h3>automate your rumble royale experience. working as of 5/11/24!</h3>
+    <h1>rumbler.ts</h1>
+    <h3>automate your rumble royale experience. working as of 2/14/25!</h3>
     <br>
     <h2>Features</h2>
 </div>
@@ -17,10 +17,10 @@
 
 <h2 align="center">Installation</h2>
 
-1. Clone the repo from Git: `git clone https://github.com/VillainsRule/Rumbler.git && cd Rumbler`
-2. Install dependencies: `npm i`
+1. Clone the repo from Git: `git clone https://github.com/VillainsRule/Rumbler && cd Rumbler`
+2. Install dependencies: `bun i`
 3. Configure the bot in `config.js`. Add tokens to `tokens.txt`.
-4. Run the program! `npm start`
+4. Run the program! `bun start`
 
 <h2 align="center">Anticheat History 🤡</h2>
 
@@ -36,11 +36,7 @@
   - Patch Published: 5/20/24
   - Notes: this is such a silly way to "fix" it, also calling 2nd time because i'm sure this will happen again.
 
-Noble (but sad) attempts. My cheats don't get patched that easily.
-
-<h2 align="center">Takedown</h2>
-
-I fully understand if the developers of Rumble Royale would like me to take this codebase down. This is published for the point of showing the exploits in RR and is not meant to be used maliciously or in public servers. You can DM @xthonk if you'd like me to remove this.
+Noble (but sad) attempts.
 
 <br><br>
-<h5 align="center">made with ❤️ by @xthonk</h5>
+<h5 align="center">made with ❤️ by VillainsRule</h5>

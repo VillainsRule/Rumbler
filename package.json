@@ -1,15 +1,13 @@
 {
     "name": "rumbler",
     "type": "module",
+    "main": "src/main.ts",
     "scripts": {
-        "start": "node src/main.js",
-        "dev": "nodemon -e 'js' src/main.js"
+        "start": "bun .",
+        "dev": "bun --watch ."
     },
     "dependencies": {
-        "chalk": "^5.3.0",
-        "discord.js-selfbot-v13": "^2.14.5"
-    },
-    "devDependencies": {
-        "nodemon": "^3.1.0"
+        "chalk": "^5.4.1",
+        "discord.js-selfbot-v13": "^3.5.1"
     }
 }

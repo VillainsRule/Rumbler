@@ -10,7 +10,7 @@
 export default {
     // the ID of the channel that the bot runs /daily and /balance in.
     // to get a channel ID, enable dev mode & right click the channel.
-    // you can also set this to "dm" or leave it blank to use DMs.
+    // you can leave this blank to use DMs.
     commandChannel: '',
 
     // whether to automatically run the /daily and /weekly commands.

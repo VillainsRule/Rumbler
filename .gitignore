@@ -1,9 +1,10 @@
 # node
-node_modules/
+node_modules
 bun.lockb
 
-# generated data
-db/
+# protected data
+db
+tokens.txt
 
 # mac conf
-**/.DS_Store
+.DS_Store

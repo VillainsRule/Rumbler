@@ -8,6 +8,6 @@
     },
     "dependencies": {
         "chalk": "^5.4.1",
-        "discord.js-selfbot-v13": "^3.5.1"
+        "discord.js-selfbot-v13": "^3.6.1"
     }
 }

@@ -10,16 +10,29 @@ import {
     PresenceStatusData
 } from 'discord.js-selfbot-v13';
 
-import config from '../config';
+const configPath = path.join(import.meta.dirname, '..', 'config.ts');
+
+if (!fs.existsSync(configPath)) {
+    fs.cpSync(path.join(import.meta.dirname, '..', 'config.example.ts'), configPath);
+    console.log(chalk.red(`> ${chalk.bold('ERROR:')} ${chalk.red('Please edit the config.ts file and restart the bot.')}`));
+    process.exit(0);
+}
+
+const tokenPath = path.join(import.meta.dirname, '..', 'tokens.txt');
+
+if (!fs.existsSync(tokenPath)) {
+    fs.writeFileSync(tokenPath, '');
+    console.log(chalk.red(`> ${chalk.bold('ERROR:')} ${chalk.red('Please add tokens to the tokens.txt file and restart the bot.')}`));
+    process.exit(0);
+}
+
+const config = (await import(configPath)).default;
 
 console.clear();
 console.log(chalk.green(`\n\n\tuser@null ~ $ RUMBLER`));
 
 if (!fs.existsSync('./db')) fs.mkdirSync('./db');
 if (!fs.existsSync('./db/accounts.json')) fs.writeFileSync('./db/accounts.json', '{}');
-
-const tokenPath = path.join(import.meta.dirname, '..', 'tokens.txt');
-if (!fs.existsSync(tokenPath)) fs.writeFileSync(tokenPath, '');
 
 const db = JSON.parse(fs.readFileSync('./db/accounts.json', 'utf-8'));
 const save = () => fs.writeFileSync('./db/accounts.json', JSON.stringify(db, null, 4));
@@ -35,7 +48,7 @@ const start = async (token: string) => {
     let wins = 0;
     let channel;
 
-    let client = new Client({ checkUpdate: false });
+    let client = new Client();
 
     client.on('ready', async () => {
         if (!client.user) throw new Error('Failed to login.');
@@ -166,7 +179,7 @@ const start = async (token: string) => {
 
         if (
             message?.interaction?.commandName === 'battle' &&
-            title && sanitize(title)?.includes('Rumble Royale')
+            title && sanitize(description!)?.includes('Click the emoji below to join. Starting in 2 minutes!')
         ) handleBattle(message, 'n');
 
         if (
@@ -224,4 +237,8 @@ tokens = tokens.map((t) => t.trim()).filter(t => t);
 if (tokens.length) for (let i = 0; i < tokens.length; i++) {
     start(tokens[i]);
     await wait(config.delays.login);
-} else console.log(`\t   ${chalk.redBright('> ERROR:')} ${chalk.red(`Tokens are missing. Enter a few in tokens.txt.\n\n`)}`);
+} else {
+    console.clear();
+    console.log(`${chalk.redBright('> ERROR:')} ${chalk.red(`Tokens are missing. Enter a few in tokens.txt.\n\n`)}`);
+    process.exit(0);
+}

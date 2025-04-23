@@ -5,6 +5,7 @@ bun.lockb
 # protected data
 db
 tokens.txt
+config.ts
 
 # mac conf
 .DS_Store

@@ -1,6 +1,6 @@
 # node
 node_modules
-bun.lockb
+bun.lock
 
 # protected data
 db
